@@ -7,6 +7,8 @@ var assign = require("object-assign");
 var fastreplace = require('./lib/fastreplace');
 var findNestedRequires = require('./lib/findNestedRequires');
 
+counter = 0
+
 function versionCheck(hbCompiler, hbRuntime) {
   return hbCompiler.COMPILER_REVISION === (hbRuntime["default"] || hbRuntime).COMPILER_REVISION;
 }
@@ -168,8 +170,8 @@ module.exports = function(source) {
 
     try {
       if (source) {
-        template = hb.precompile(source.body, {
-          knownHelpersOnly: false,
+        template = hb.precompile((source.body || source ), {
+          knownHelpersOnly: firstCompile ? false : true,
           knownHelpers: knownHelpers,
           preventIndent: query.preventIndent,
           compat: query.compat ? true : false
@@ -319,7 +321,7 @@ module.exports = function(source) {
       var slug = template ?
         'var Handlebars = require(' + JSON.stringify(runtimePath) + ');\n'
         + 'function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }\n'
-        + 'module.exports = function() { return {fn: (Handlebars["default"] || Handlebars).template(' + template + '), attributes: ' + JSON.stringify(source.attributes) + '}}' :
+        + 'module.exports = () => { return { compile: (Handlebars["default"] || Handlebars).template(' + template + '), attributes: ' + JSON.stringify(source.attributes) + '}}' :
         'module.exports = function(){return "";};';
 
       loaderAsyncCallback(null, slug);
