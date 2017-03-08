@@ -168,8 +168,8 @@ module.exports = function(source) {
 
     try {
       if (source) {
-        template = hb.precompile(source, {
-          knownHelpersOnly: firstCompile ? false : true,
+        template = hb.precompile(source.body, {
+          knownHelpersOnly: false,
           knownHelpers: knownHelpers,
           preventIndent: query.preventIndent,
           compat: query.compat ? true : false
@@ -319,10 +319,11 @@ module.exports = function(source) {
       var slug = template ?
         'var Handlebars = require(' + JSON.stringify(runtimePath) + ');\n'
         + 'function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }\n'
-        + 'module.exports = (Handlebars["default"] || Handlebars).template(' + template + ');' :
+        + 'module.exports = function() { return {fn: (Handlebars["default"] || Handlebars).template(' + template + '), attributes: ' + JSON.stringify(source.attributes) + '}}' :
         'module.exports = function(){return "";};';
 
       loaderAsyncCallback(null, slug);
+
     };
 
     var resolveItems = function(err, type, items, iterator, callback) {
